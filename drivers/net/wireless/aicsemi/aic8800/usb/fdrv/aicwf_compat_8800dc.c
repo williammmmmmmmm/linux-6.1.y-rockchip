@@ -3162,6 +3162,7 @@ void system_config_8800dc(struct rwnx_hw *rwnx_hw){
     array3_tbl_t p_syscfg_msk_tbl;
     int ret, cnt;
     const u32 mem_addr = 0x40500000;
+    const u32 cache_mem_addr = 0x40100020;
     struct dbg_mem_read_cfm rd_mem_addr_cfm;
 
     ret = rwnx_send_dbg_mem_read_req(rwnx_hw, mem_addr, &rd_mem_addr_cfm);
@@ -3174,7 +3175,20 @@ void system_config_8800dc(struct rwnx_hw *rwnx_hw){
     if (((rd_mem_addr_cfm.memdata >> 25) & 0x01UL) == 0x00UL) {
         chip_mcu_id = 1;
     }
+    if (chip_mcu_id) {
+        ret = rwnx_send_dbg_mem_read_req(rwnx_hw, cache_mem_addr, &rd_mem_addr_cfm);
+        if (ret) {
+            AICWFDBG(LOGERROR, "%x rd fail: %d\n", mem_addr, ret);
+            return;
+        }
+        rd_mem_addr_cfm.memdata |= 0x01;
+        ret = rwnx_send_dbg_mem_write_req(rwnx_hw, cache_mem_addr, rd_mem_addr_cfm.memdata);
 
+        if (ret) {
+            AICWFDBG(LOGERROR, "%x write fail: %d\n", cache_mem_addr, ret);
+            return;
+        }
+    }
     ret = rwnx_send_dbg_mem_read_req(rwnx_hw, 0x00000020, &rd_mem_addr_cfm);
     if (ret) {
 		AICWFDBG(LOGERROR, "[0x00000020] rd fail: %d\n", ret);

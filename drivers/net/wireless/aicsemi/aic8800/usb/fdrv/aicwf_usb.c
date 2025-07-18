@@ -2128,7 +2128,9 @@ static int aicwf_parse_usb(struct aic_usb_dev *usb_dev, struct usb_interface *in
 			usb_dev->chipid = PRODUCT_ID_AIC8800DW;
 		}else if (usb_dev->chipid == PRODUCT_ID_AIC8800D81) {
 			AICWFDBG(LOGERROR, "AIC8800D80\n");
-        } else {
+        } else if (usb_dev->chipid == PRODUCT_ID_AIC8800DW) {
+		 printk("8800dw\n");	
+	}else {
 			ret = -ENODEV;
 			goto exit;
 		}
